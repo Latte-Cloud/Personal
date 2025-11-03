@@ -21,7 +21,7 @@ if files:
 else:
     last_file = ""
 
-print("Last payslip downloaded : "+last_file)
+print("Last payslip downloaded : "+last_file) # FIXME Last downloaded is chronological first
 
 def download_slip():
     options = webdriver.ChromeOptions()
