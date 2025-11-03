@@ -15,13 +15,40 @@ download_dir = os.getenv("DOWNLOAD_DIR")
 url = os.getenv("URL")
 
 # Last file downloaded
-files = sorted(os.listdir(download_dir), key=lambda f: os.path.getmtime(os.path.join(download_dir, f)))
+files = sorted(os.listdir(download_dir), reverse=True)
 if files:
-    last_file = os.path.join(download_dir, files[-1])
+    last_file = os.path.join(download_dir, files[0])
 else:
     last_file = ""
 
-print("Last payslip downloaded : "+last_file) # FIXME Last downloaded is chronological first
+print("Last payslip downloaded : "+last_file)
+
+def month_year_to_iso(s):
+    month_map = {
+        "Janvier": "01",
+        "Février": "02",
+        "Mars": "03",
+        "Avril": "04",
+        "Mai": "05",
+        "Juin": "06",
+        "Juillet": "07",
+        "Août": "08",
+        "Septembre": "09",
+        "Octobre": "10",
+        "Novembre": "11",
+        "Décembre": "12"
+    }
+
+    parts = s.strip().split()
+    if len(parts) != 2:
+        raise ValueError(f"Unexpected format: {s}")
+    month_name, year = parts
+
+    month_num = month_map.get(month_name)
+    if not month_num:
+        raise ValueError(f"Unknown month name: {month_name}")
+
+    return f"{year}-{month_num}"
 
 def download_slip():
     options = webdriver.ChromeOptions()
@@ -61,7 +88,7 @@ def download_slip():
         i = 0
         
         for date in dates:
-            d=date.get_attribute("innerText")
+            d=month_year_to_iso(date.get_attribute("innerText"))
             pdf_url=pdf_links[i].get_attribute("href")
             print("date :"+d+", links :"+pdf_url)
             driver.execute_script("window.open(arguments[0]);", pdf_url)
