@@ -73,34 +73,47 @@ def download_slip():
         print("Logged in")
 
         driver.get(url+"/e/100630/payslips")
+        
+        years=True
+        while years:
 
-        dates = wait.until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "tbody tr th"))
-        )
-        
-        pdf_links = wait.until(
-            EC.presence_of_all_elements_located(
-                (By.XPATH, "//a[contains(@href, 'pdf')]")
+            dates = wait.until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "tbody tr th"))
             )
-        )
-        
-        i = 0
-        
-        for date in dates:
-            d=month_year_to_iso(date.get_attribute("innerText"))+".pdf"
-            if download_dir+"/"+d == last_file:
-                print("We already downloaded this file")
-                break
-            pdf_url=pdf_links[i].get_attribute("href")
-            print("date :"+d+", links :"+pdf_url)
-            driver.execute_script("window.open(arguments[0]);", pdf_url)
-            time.sleep(1)
-            files = sorted(os.listdir(download_dir), key=lambda f: os.path.getmtime(os.path.join(download_dir, f)))
-            latest_file = os.path.join(download_dir, files[-1])
-            new_name = os.path.join(download_dir, d)
-            os.rename(latest_file, new_name)
-            print("Renamed "+latest_file+" into "+new_name)
-            i+=1
+            
+            pdf_links = wait.until(
+                EC.presence_of_all_elements_located(
+                    (By.XPATH, "//a[contains(@href, 'pdf')]")
+                )
+            )       
+            i = 0
+            
+            for date in dates:
+                d=month_year_to_iso(date.get_attribute("innerText"))+".pdf"
+                if download_dir+"/"+d == last_file:
+                    print("We already downloaded this file")
+                    break
+                pdf_url=pdf_links[i].get_attribute("href")
+                print("date :"+d+", links :"+pdf_url)
+                driver.execute_script("window.open(arguments[0]);", pdf_url)
+                time.sleep(1)
+                files = sorted(os.listdir(download_dir), key=lambda f: os.path.getmtime(os.path.join(download_dir, f)))
+                latest_file = os.path.join(download_dir, files[-1])
+                new_name = os.path.join(download_dir, d)
+                os.rename(latest_file, new_name)
+                print("Renamed "+latest_file+" into "+new_name)
+                i+=1
+            
+            year = wait.until(
+                EC.presence_of_all_elements_located((By.CLASS_NAME, "btn-nav-previous"))
+            )
+            new_url=year[0].get_attribute("href")
+            print("New url : "+new_url)
+            if "#" not in new_url:
+                driver.get(new_url)
+            else:
+                years=False
+            
 
     except Exception as e:
         print("Error :", e)
