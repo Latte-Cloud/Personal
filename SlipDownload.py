@@ -67,19 +67,18 @@ def download_slip():
         driver.get(url+"/login")
         print("Login...")
         
-        wait = WebDriverWait(driver, 10)  # wait up to 10 seconds for elements
-        print(USER)
+        wait = WebDriverWait(driver, 15)  # wait up to 15 seconds for elements
         wait.until(EC.presence_of_element_located((By.ID, "username"))).send_keys(USER)
         wait.until(EC.presence_of_element_located((By.ID, "password"))).send_keys(PASS + Keys.RETURN)
         print("Logged in")
 
         driver.get(url+"/e/100630/payslips")
 
-        dates = WebDriverWait(driver, 15).until(
+        dates = wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "tbody tr th"))
         )
         
-        pdf_links = WebDriverWait(driver, 15).until(
+        pdf_links = wait.until(
             EC.presence_of_all_elements_located(
                 (By.XPATH, "//a[contains(@href, 'pdf')]")
             )
@@ -95,7 +94,7 @@ def download_slip():
             pdf_url=pdf_links[i].get_attribute("href")
             print("date :"+d+", links :"+pdf_url)
             driver.execute_script("window.open(arguments[0]);", pdf_url)
-            time.sleep(2)
+            time.sleep(1)
             files = sorted(os.listdir(download_dir), key=lambda f: os.path.getmtime(os.path.join(download_dir, f)))
             latest_file = os.path.join(download_dir, files[-1])
             new_name = os.path.join(download_dir, d)
