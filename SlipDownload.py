@@ -16,7 +16,12 @@ url = os.getenv("URL")
 
 # Last file downloaded
 files = sorted(os.listdir(download_dir), key=lambda f: os.path.getmtime(os.path.join(download_dir, f)))
-last_file = os.path.join(download_dir, files[-1])
+if files:
+    last_file = os.path.join(download_dir, files[-1])
+else:
+    last_file = ""
+
+print("Last payslip downloaded : "+last_file)
 
 def download_slip():
     options = webdriver.ChromeOptions()
@@ -35,6 +40,8 @@ def download_slip():
         driver.get(url+"/login")
         print("Login...")
         
+        wait = WebDriverWait(driver, 10)  # wait up to 10 seconds for elements
+        print(USER)
         wait.until(EC.presence_of_element_located((By.ID, "username"))).send_keys(USER)
         wait.until(EC.presence_of_element_located((By.ID, "password"))).send_keys(PASS + Keys.RETURN)
         print("Logged in")
